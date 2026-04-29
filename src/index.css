@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { background-color: #0F1117; }
+  body {
+    background-color: #0F1117;
+    color: #E8EAF6;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #1A1D27; }
+  ::-webkit-scrollbar-thumb { background: #6C63FF; border-radius: 99px; }
+  * { box-sizing: border-box; }
+}
+
+@layer components {
+  .card-glow {
+    box-shadow: 0 0 0 1px #6C63FF33, 0 8px 32px #6C63FF18;
+  }
+  .card-glow-green {
+    box-shadow: 0 0 0 1px #43E97B33, 0 8px 32px #43E97B18;
+  }
+  .card-glow-red {
+    box-shadow: 0 0 0 1px #FF658433, 0 8px 32px #FF658418;
+  }
+  .btn-accent {
+    @apply bg-accent text-white font-bold rounded-xl px-5 py-2.5 text-sm
+           hover:bg-accent/90 active:scale-95 transition-all duration-150
+           focus:outline-none focus:ring-2 focus:ring-accent/50;
+  }
+  .btn-ghost {
+    @apply bg-surface2 text-dim border border-border rounded-xl px-5 py-2.5 text-sm
+           hover:bg-border hover:text-white active:scale-95 transition-all duration-150
+           focus:outline-none;
+  }
+  .input-field {
+    @apply w-full bg-surface2 border border-border rounded-xl px-4 py-2.5 text-sm
+           text-white placeholder:text-dim
+           focus:outline-none focus:border-accent transition-colors;
+  }
+  .surface-card {
+    @apply bg-surface border border-border rounded-2xl;
+  }
+  .sidebar-btn {
+    @apply w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold
+           transition-all duration-150 active:scale-95 text-left;
+  }
+}
