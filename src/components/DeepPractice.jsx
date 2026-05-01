@@ -10,9 +10,58 @@ function shuffle(arr) {
   return a
 }
 
-// ─── Exercise 1: Matching ────────────────────────────────────────────────────
+// ─── Exercise 1: Matching (nhiều màn, mỗi màn 5 cặp) ───────────────────────
+const MATCH_PER_ROUND = 5
+
 function MatchingExercise({ words, onDone }) {
-  const [pool]      = useState(() => shuffle(words).slice(0, 10))
+  const [rounds] = useState(() => {
+    const shuffled = shuffle(words)
+    const result = []
+    for (let i = 0; i < shuffled.length; i += MATCH_PER_ROUND) {
+      result.push(shuffled.slice(i, i + MATCH_PER_ROUND))
+    }
+    return result
+  })
+  const [roundIdx,   setRoundIdx]   = useState(0)
+  const totalScoreRef = useRef(0)
+  const totalPairsRef = useRef(0)
+  const [displayScore, setDisplayScore] = useState(0)
+  const [displayPairs, setDisplayPairs] = useState(0)
+
+  function handleRoundDone(roundScore, roundTotal) {
+    totalScoreRef.current += roundScore
+    totalPairsRef.current += roundTotal
+    setDisplayScore(totalScoreRef.current)
+    setDisplayPairs(totalPairsRef.current)
+    if (roundIdx + 1 >= rounds.length) {
+      setTimeout(() => onDone(totalScoreRef.current, totalPairsRef.current), 400)
+    } else {
+      setTimeout(() => setRoundIdx(i => i + 1), 400)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-dim">Màn {roundIdx + 1} / {rounds.length}</span>
+        <span className="text-accent3 font-bold">{displayScore} / {displayPairs} cặp đúng</span>
+      </div>
+      <div className="flex gap-1">
+        {rounds.map((_, i) => (
+          <div key={i} className={`h-1 flex-1 rounded-full transition-colors
+            ${i < roundIdx ? 'bg-accent3' : i === roundIdx ? 'bg-accent' : 'bg-border'}`} />
+        ))}
+      </div>
+      <MatchingRound
+        key={roundIdx}
+        pool={rounds[roundIdx]}
+        onDone={handleRoundDone}
+      />
+    </div>
+  )
+}
+
+function MatchingRound({ pool, onDone }) {
   const [leftList]  = useState(() => shuffle(pool))
   const [rightList] = useState(() => shuffle(pool))
   const [matched,  setMatched]  = useState(new Set())
@@ -52,17 +101,16 @@ function MatchingExercise({ words, onDone }) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="text-center">
-        <span className="text-accent3 font-bold">{score} / {pool.length}</span>
-        <span className="text-dim text-sm ml-2">cặp đúng</span>
+    <div className="flex flex-col gap-4 animate-fade-in">
+      <div className="flex items-center justify-between">
+        <p className="text-dim text-xs">Click từ vựng và nghĩa tương ứng để ghép cặp</p>
+        <span className="text-accent3 font-bold text-sm">{score} / {pool.length}</span>
       </div>
-      <p className="text-dim text-xs text-center">Click vào từ vựng và nghĩa tương ứng để ghép cặp</p>
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-2">
           {leftList.map(w => (
             <button key={w.Id} onClick={() => handleClick('left', w.Id)}
-              className={`px-3 py-2.5 rounded-xl border text-sm font-semibold text-center transition-colors ${btnCls('left', w.Id)}`}>
+              className={`px-3 py-3 rounded-xl border text-sm font-semibold text-center transition-colors ${btnCls('left', w.Id)}`}>
               {w.TuVung}
             </button>
           ))}
@@ -70,7 +118,7 @@ function MatchingExercise({ words, onDone }) {
         <div className="flex flex-col gap-2">
           {rightList.map(w => (
             <button key={w.Id} onClick={() => handleClick('right', w.Id)}
-              className={`px-3 py-2.5 rounded-xl border text-sm text-center transition-colors ${btnCls('right', w.Id)}`}>
+              className={`px-3 py-3 rounded-xl border text-sm text-center transition-colors ${btnCls('right', w.Id)}`}>
               {w.Nghia}
             </button>
           ))}
