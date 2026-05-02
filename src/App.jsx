@@ -8,10 +8,21 @@ import EditVocabModal  from './components/EditVocabModal'
 import ImportModal     from './components/ImportModal'
 import TempFlashModal  from './components/TempFlashModal'
 import { Spinner, Toast } from './components/UI'
+import LoginPage, { isAuthenticated, clearAuth } from './components/LoginPage'
 
 const MAX_STUDY = 30
 
 export default function App() {
+  const [authed, setAuthed] = useState(() => isAuthenticated())
+
+  if (!authed) {
+    return <LoginPage onLogin={() => setAuthed(true)} />
+  }
+
+  return <AppInner onLogout={() => { clearAuth(); setAuthed(false) }} />
+}
+
+function AppInner({ onLogout }) {
   const [words,       setWords]       = useState([])
   const [checkStates, setCheckStates] = useState({})
   const [loading,     setLoading]     = useState(true)
@@ -198,10 +209,21 @@ export default function App() {
             onClick={() => { setShowTemp(true); setSidebarOpen(false) }}
           />
 
-          <div className="mt-auto surface-card p-4 flex flex-col gap-1.5">
-            <Stat label="Tổng"     value={`${words.length} từ`} />
-            <Stat label="Hôm nay"  value={`${todayCount} từ`}   />
-            <Stat label="Đã chọn"  value={`${selectedCount} từ`} />
+          <div className="mt-auto flex flex-col gap-2">
+            <div className="surface-card p-4 flex flex-col gap-1.5">
+              <Stat label="Tổng"     value={`${words.length} từ`} />
+              <Stat label="Hôm nay"  value={`${todayCount} từ`}   />
+              <Stat label="Đã chọn"  value={`${selectedCount} từ`} />
+            </div>
+            <button
+              onClick={() => { setSidebarOpen(false); onLogout() }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm
+                         font-semibold text-dim border border-border bg-surface2/50
+                         hover:bg-accent2/10 hover:text-accent2 hover:border-accent2/40
+                         transition-all active:scale-95"
+            >
+              <span>🚪</span><span>Đăng xuất</span>
+            </button>
           </div>
         </aside>
 
