@@ -157,7 +157,13 @@ function AppInner({ onLogout }) {
           </svg>
         </button>
 
-        <span className="text-white font-extrabold text-xl tracking-tight">⚡ FlashVocab</span>
+        <button
+          onClick={() => setView('home')}
+          className="text-white font-extrabold text-xl tracking-tight
+                     hover:text-accent transition-colors active:scale-95"
+        >
+          ⚡ FlashVocab
+        </button>
 
         <div className="ml-auto flex items-center gap-3">
           {loading && <Spinner size={18} />}
@@ -246,7 +252,12 @@ function AppInner({ onLogout }) {
           {view === 'study' && (
             <FlashCardSession
               words={words.filter(w => checkStates[w.Id]).slice(0, MAX_STUDY)}
+              onSave={results => {
+                // Chỉ lưu kết quả lên Supabase, KHÔNG về home
+                applyResults(results)
+              }}
               onDone={results => {
+                // Lưu kết quả VÀ về home
                 applyResults(results)
                 setView('home')
               }}

@@ -1,18 +1,38 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import FlashCard from './FlashCard'
 import { ProgressBar } from './UI'
 import DeepPractice from './DeepPractice'
 
 const MAX_STUDY = 30
 
-export default function FlashCardSession({ words: rawWords, tempMode = false, onDone, onBack }) {
-  const words = rawWords.slice(0, MAX_STUDY)
+export default function FlashCardSession({ words: rawWords, tempMode = false, onSave, onDone, onBack }) {
+  // Freeze danh sách từ lúc mount – tránh bị tính lại khi App re-render sau onSave
+  const [words] = useState(() => rawWords.slice(0, MAX_STUDY))
 
   const [current,  setCurrent]  = useState(0)
   const [flipped,  setFlipped]  = useState(false)
   const [results,  setResults]  = useState({})    // id -> 'remember'|'forget'
   const [phase,    setPhase]    = useState('card') // card | finish | deep
   const [showPhon, setShowPhon] = useState(true)
+  // Đảm bảo chỉ lưu kết quả lên Supabase đúng 1 lần
+  const savedRef = useRef(false)
+
+  // saveAndContinue: lưu kết quả nhưng KHÔNG về home (dùng khi vào deep practice)
+  function saveAndContinue(res) {
+    if (!tempMode && !savedRef.current) {
+      savedRef.current = true
+      if (onSave) onSave(Object.entries(res))
+    }
+  }
+  // saveAndExit: lưu kết quả VÀ về home
+  function saveAndExit(res) {
+    if (!tempMode && !savedRef.current) {
+      savedRef.current = true
+      onDone(Object.entries(res))
+    } else {
+      onBack()
+    }
+  }
 
   // keyboard
   const handleKey = useCallback(e => {
@@ -24,7 +44,7 @@ export default function FlashCardSession({ words: rawWords, tempMode = false, on
     if (phase === 'finish') {
       if (e.key === '1') endSession()
       if (e.key === '2') replay()
-      if (e.key === '3') setPhase('deep')
+      if (e.key === '3') { saveAndContinue(results); setPhase('deep') }
     }
   }, [phase, flipped, current])
 
@@ -49,7 +69,7 @@ export default function FlashCardSession({ words: rawWords, tempMode = false, on
     setFlipped(false)
   }
   function endSession() {
-    if (!tempMode) onDone(Object.entries(results))
+    saveAndExit(results)
     onBack()
   }
   function replay() {
@@ -71,8 +91,7 @@ export default function FlashCardSession({ words: rawWords, tempMode = false, on
       <DeepPractice
         words={words}
         onDone={() => {
-          // Lưu kết quả flashcard rồi mới thoát
-          if (!tempMode) onDone(Object.entries(results))
+          // Kết quả đã được lưu khi bấm "Ôn chuyên sâu", chỉ cần về home
           onBack()
         }}
       />
@@ -106,6 +125,7 @@ export default function FlashCardSession({ words: rawWords, tempMode = false, on
           </button>
           <button
             onClick={() => {
+              saveAndContinue(results)
               setPhase('deep')
             }}
             className="px-5 py-2.5 rounded-xl font-bold text-sm
