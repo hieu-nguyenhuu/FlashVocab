@@ -172,7 +172,10 @@ function MCQExercise({ words, mode, onDone }) {
     if (idx === correctIdx) {
       scoreRef.current += 1
       setScore(scoreRef.current)
+      // Đúng → tự động next sau 600ms để thấy highlight xanh
+      setTimeout(() => next(), 600)
     }
+    // Sai → giữ nguyên, hiện nút "Tiếp" để user tự next
   }
 
   function next() {
@@ -211,7 +214,7 @@ function MCQExercise({ words, mode, onDone }) {
       </div>
       <p className="text-dim text-xs text-center">
         {mode === 'choose_word' ? 'Chọn từ vựng đúng nghĩa trên' : 'Chọn nghĩa đúng của từ trên'}
-        &nbsp;·&nbsp; Phím 1–4 để chọn &nbsp;·&nbsp; Space để tiếp
+        &nbsp;·&nbsp; Phím 1–4 để chọn &nbsp;·&nbsp; Đúng: tự next · Sai: nhấn Space
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {choices.map((c, idx) => (
@@ -222,7 +225,7 @@ function MCQExercise({ words, mode, onDone }) {
           </button>
         ))}
       </div>
-      {answered && (
+      {answered && chosen !== correctIdx && (
         <div className="text-center animate-fade-in">
           <button onClick={next} className="btn-accent px-8">
             {qi + 1 >= questions.length ? '🏁 Xong bài' : 'Tiếp [Space]'}
