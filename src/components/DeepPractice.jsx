@@ -278,7 +278,10 @@ function FillExercise({ words, onDone }) {
     if (ok) {
       scoreRef.current += 1
       setScore(scoreRef.current)
+      // Đúng → tự động next sau 600ms
+      setTimeout(() => next(), 600)
     }
+    // Sai → hiện đáp án đúng, chờ user nhấn next
   }
 
   function next() {
@@ -342,18 +345,20 @@ function FillExercise({ words, onDone }) {
         </button>
       </div>
 
-      {answered && (
-        <p className={`text-center font-bold animate-fade-in ${correct ? 'text-accent3' : 'text-accent2'}`}>
-          {correct ? '✅ Chính xác!' : `❌ Đáp án đúng: ${q.TuVung}`}
+      {answered && !correct && (
+        <p className="text-center font-bold animate-fade-in text-accent2">
+          ❌ Đáp án đúng: {q.TuVung}
         </p>
       )}
 
       <div className="flex gap-3 justify-center">
         {!answered
           ? <button onClick={check} className="btn-accent px-8">Kiểm tra [Enter]</button>
-          : <button onClick={next}  className="btn-accent px-8">
-              {qi + 1 >= questions.length ? '🏁 Xong bài' : 'Tiếp [Enter]'}
-            </button>
+          : !correct && (
+              <button onClick={next} className="btn-accent px-8">
+                {qi + 1 >= questions.length ? '🏁 Xong bài' : 'Tiếp [Enter]'}
+              </button>
+            )
         }
       </div>
       <p className="text-dim text-xs text-center">Ctrl → gợi ý từng chữ</p>
